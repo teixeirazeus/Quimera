@@ -1,0 +1,2 @@
+#include <stdio.h> 
+ int main(int argc, char **argv){int x,y;float z,w;int r[5]; x=0 ; x=1+1;printf("%i",x);printf("\n");if(x==4){printf("x é 4");printf("\n");}else{printf("x não é 4");printf("\n");}while(x != 0){printf("%i",x); x=x+-1;}printf("");printf("\n");printf("Teste de codigo em c \n");return 0;}
