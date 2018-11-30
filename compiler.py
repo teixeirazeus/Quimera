@@ -58,8 +58,10 @@ def printf(cFile, line, var):
       cFile.write('printf('+'"'+line.split('"')[1]+'"'+');')
    else:
       x = cleanS(line.split()[1])
-      if var[x]:return cFile.write('printf("%f",'+str(x)+')'+';')
-      cFile.write('printf("%i",'+str(x)+')'+';')
+      if var[x]:
+          cFile.write('printf("%f",'+str(x)+')'+';')
+      else:
+          cFile.write('printf("%i",'+str(x)+')'+';')
    if line[:7] == 'println': cFile.write('printf("\\n");')
 
 def addVar(var, data):
@@ -85,9 +87,36 @@ def op(cFile, line, op):
 def loopFor(cFile, line, var):
     line = line.split()
     var[line[1]] = 0
-    cFile.write('int '+line[1]+'='+line[2]+';')
-    cFile.write('for('+';'+line[1]+'<='+line[4].replace(':','')+';'+line[1]+'++){')
+    inicial = 'int '+line[1]+'='+line[2]
+    final = line[4].replace(':','')
+    step = False
+
+    #passo
+    if len(line) > 5:
+        jump = line[5].replace(':','')
+        if '.' in jump:
+            inicial = 'float '+line[1]+'='+line[2]
+            var[line[1]] = 1
+        step = True
+
+    if int(line[2]) < int(final):
+        #cFile.write('for('+inicial+';'+line[1]+'<='+final+';'+line[1]+'++){')
+        cFile.write('for('+inicial+';'+line[1]+'<='+final+';')
+        if step:
+            cFile.write(line[1]+'+='+jump+'){')
+        else:
+            cFile.write(line[1]+'++){')
+    else:
+        #cFile.write('for('+inicial+';'+line[1]+'>='+final+';'+line[1]+'--){')
+        cFile.write('for('+inicial+';'+line[1]+'>='+final+';')
+        if step:
+            cFile.write(line[1]+'-='+jump+'){')
+        else:
+            cFile.write(line[1]+'--){')
+
     return 1
+
+
 
 def main(args):
 
