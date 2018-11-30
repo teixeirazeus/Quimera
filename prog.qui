@@ -8,7 +8,7 @@ int r[5]
 + 1 1 > x
 println x
 
-if x = 4:
+if x = 4 && True:
    println "x é 4"
 else:
    println "x não é 4"
@@ -22,6 +22,15 @@ println ""
 
 for tmp 1 to 4:
     println "hey"
+    println tmp
+
+println "outro for"
+
+for tmp 4 to 1:
+    println tmp
+
+println "float"
+for tmp 10 to 1 1.2:
     println tmp
 
 
