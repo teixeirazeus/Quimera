@@ -1,2 +1,1 @@
 # Quimera
-Quantum programing language
