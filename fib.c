@@ -1,2 +1,0 @@
-#include <stdio.h> 
- int main(int argc, char **argv){int a,b,c; a=0 ; b=1 ; c=1 ;printf("%i",a);printf(" ");printf("%i",c);printf(" ");int i; i=1 ;while(i < 10){ c=a+b; a=b ; b=c ;printf("%i",c);printf(" "); i=1+i;}printf("");printf("\n");int tmp=1;for(;tmp<=4;tmp++){printf("hey");printf("\n");printf("%i",tmp);printf("\n");}return 0;}

@@ -3,21 +3,21 @@ float z w
 int r[5]
 
 #x = 0
-0 > x
+0 >> x
 
-+ 1 1 > x
++ 1 1 >> x
 println x
 
-if x = 4 && True:
+if x = 4 && 1:
    println "x é 4"
 else:
    println "x não é 4"
 
 while x != 0:
    print x
-   + x -1 > x
+   + x -1 >> x
 
-println ""
+println "sss"
 
 
 for tmp 1 to 4:

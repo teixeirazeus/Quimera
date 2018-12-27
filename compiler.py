@@ -25,7 +25,8 @@
 import os
 
 def assign(cFile, line):
-   cut = line.split('>')
+   cut = line.split('>>')
+   print(">>>",cut)
    cFile.write(cut[1]+'='+cut[0]+';')
 
 def whileS(cFile, line):
@@ -79,7 +80,7 @@ def let(cFile, line, type):
 
 def op(cFile, line, op):
    #line = 'OP 5 2 5 > x'
-   tmp = line.split('>')
+   tmp = line.split('>>')
    tmp[0] = tmp[0].split(op)[1]
    tmp[0] = op.join(tmp[0].split())
    cFile.write(tmp[1]+'='+tmp[0]+';')
@@ -178,7 +179,7 @@ def main(args):
       #declarações
       elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
       elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'int'))
-      elif '>' in line: assign(cFile, line)
+      elif '>>' in line: assign(cFile, line)
 
    ###
    #final do programa
