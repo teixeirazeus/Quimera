@@ -58,8 +58,7 @@ def printf(cFile, line, var):
       cFile.write('printf('+'"'+line.split('"')[1]+'"'+');')
    else:
       x = cleanS(line.split()[1])
-      tp = {0:'%i', 1:'%f', 2:'%c'}
-      cFile.write('printf("'+tp[var[x]]+'",'+str(x)+')'+';')
+      cFile.write('printf("'+var[x]+'",'+str(x)+')'+';')
 
    if line[:7] == 'println': cFile.write('printf("\\n");')
 
@@ -74,8 +73,7 @@ def let(cFile, line, type):
    list = line[size:].split()
    cFile.write(type+' '+(','.join(list))+';')
 
-   n = {'int':0, 'float':1, 'char':2}
-   return n[type], list
+   return type, list
 
 def op(cFile, line, op):
    #line = 'OP 5 2 5 > x'
@@ -86,7 +84,7 @@ def op(cFile, line, op):
 
 def loopFor(cFile, line, var):
     line = line.split()
-    var[line[1]] = 0
+    var[line[1]] = 'i'
     inicial = 'int '+line[1]+'='+line[2]
     final = line[4].replace(':','')
     step = False
@@ -96,7 +94,7 @@ def loopFor(cFile, line, var):
         jump = line[5].replace(':','')
         if '.' in jump:
             inicial = 'float '+line[1]+'='+line[2]
-            var[line[1]] = 1
+            var[line[1]] = 'f'
         step = True
 
     if int(line[2]) < int(final):
@@ -116,9 +114,48 @@ def loopFor(cFile, line, var):
 
     return 1
 
+def smartSplit(string):
+    #fast
+    if ',' not in string: return [string]
+
+    block = ""
+    aspas = False
+    list = []
+    for c in string:
+        if c == '"': aspas = not aspas
+        block += c
+        if not aspas and c == ',':
+            list.append(block.replace(',',''))
+            block = ''
+    list.append(block)
+    return list
+
+def holyPrint(cFile, line, var):
+    dataList = smartSplit(line)
+
+    cFile.write('printf("')
+    tmp = []
+    for x in dataList:
+        if x not in var.keys():
+            #cFile.write('%s ')
+            if '"' in x: tmp.append('%s')
+            else: tmp.append('%i')
+        else:
+            #cFile.write('%'+var[x]+' ')
+            tmp.append('%'+var[x])
+    cFile.write(' '.join(tmp))
+    cFile.write('",'+(','.join(dataList))+');\n')
 
 
 def main(args):
+   if len(args) == 1:
+       print("Quimera compiler version 1.0.1")
+       print("Use:")
+       print("./compiler <QUIMERA_CODE.qui> <OPTIONS>")
+       print("Options:")
+       print("-c: compile with gcc")
+       print("-r: run after compile")
+       return 0
 
    name = args[1].split('.')[0]
 
@@ -131,7 +168,10 @@ def main(args):
    program = program.split('\n')
 
    #tabelas de simbolos
-   var = {} #0 = inteiro, 1 = float, 2 = char
+   var = {}
+   #old <> 0 = inteiro, 1 = float, 2 = char
+   #i = inteiro, f = float, c = char
+
 
    #tab
    tabBalance = 0
@@ -153,6 +193,7 @@ def main(args):
             cFile.write('else{')
             tabBalance += 1
          tabBalance -= 1
+         continue
 
       line = cleanS(line)
 
@@ -176,20 +217,21 @@ def main(args):
       elif line[:5] == 'print': printf(cFile, line, var)
 
       #declarações
-      elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
-      elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'char'))
-      elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'int'))
+      elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'f'))
+      elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'c'))
+      elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'i'))
       elif '>>' in line: assign(cFile, line)
+      else: holyPrint(cFile, line, var)
 
-   ###
+   ##
    #final do programa
    for x in range(tabBalance): cFile.write('}')
 
    cFile.write('return 0;}')
    cFile.close()
 
-   os.system("gcc "+name+".c -O3 -o "+name)
-   os.system('./'+name)
+   if "-c" in args: os.system("gcc "+name+".c -O3 -o "+name)
+   if "-r" in args: os.system('./'+name)
 
    return 0
 

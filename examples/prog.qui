@@ -2,7 +2,7 @@ int x y
 float z w
 int r[5]
 char b
-"b" >> b
+'b' >> b
 
 #x = 0
 0 >> x
@@ -38,3 +38,5 @@ for tmp 10 to 1 1.2:
 
 
 {printf("Teste de codigo em c \n");}
+
+"print like holyc",10,2.2
