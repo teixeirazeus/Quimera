@@ -58,21 +58,22 @@ def printf(cFile, line, var):
       cFile.write('printf('+'"'+line.split('"')[1]+'"'+');')
    else:
       x = cleanS(line.split()[1])
-      cFile.write('printf("'+var[x]+'",'+str(x)+')'+';')
+      cFile.write('printf("%'+var[x]+'",'+str(x)+')'+';')
 
    if line[:7] == 'println': cFile.write('printf("\\n");')
 
 def addVar(var, data):
    #adiciona variaveis a tabela var
+   #print(var,data)
+   tp = {'int':'i','float':'f','char':'c'}
    for x in data[1]:
-      var[x] = data[0]
+      var[x] = tp[data[0]]
 
 def let(cFile, line, type):
    #declaraçao de variaveis
    size = len(type)
    list = line[size:].split()
    cFile.write(type+' '+(','.join(list))+';')
-
    return type, list
 
 def op(cFile, line, op):
@@ -139,6 +140,7 @@ def holyPrint(cFile, line, var):
         if x not in var.keys():
             #cFile.write('%s ')
             if '"' in x: tmp.append('%s')
+            elif '.' in x: tmp.append('%.'+str(len(x.split('.')[1]))+'f')
             else: tmp.append('%i')
         else:
             #cFile.write('%'+var[x]+' ')
@@ -217,11 +219,13 @@ def main(args):
       elif line[:5] == 'print': printf(cFile, line, var)
 
       #declarações
-      elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'f'))
-      elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'c'))
-      elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'i'))
+      elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
+      elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'char'))
+      elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'int'))
       elif '>>' in line: assign(cFile, line)
-      else: holyPrint(cFile, line, var)
+      else:
+          print("<>",line)
+          holyPrint(cFile, line, var)
 
    ##
    #final do programa
