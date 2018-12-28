@@ -1,6 +1,8 @@
 int x y
 float z w
 int r[5]
+char b
+"b" >> b
 
 #x = 0
 0 >> x

@@ -26,7 +26,6 @@ import os
 
 def assign(cFile, line):
    cut = line.split('>>')
-   print(">>>",cut)
    cFile.write(cut[1]+'='+cut[0]+';')
 
 def whileS(cFile, line):
@@ -59,10 +58,9 @@ def printf(cFile, line, var):
       cFile.write('printf('+'"'+line.split('"')[1]+'"'+');')
    else:
       x = cleanS(line.split()[1])
-      if var[x]:
-          cFile.write('printf("%f",'+str(x)+')'+';')
-      else:
-          cFile.write('printf("%i",'+str(x)+')'+';')
+      tp = {0:'%i', 1:'%f', 2:'%c'}
+      cFile.write('printf("'+tp[var[x]]+'",'+str(x)+')'+';')
+
    if line[:7] == 'println': cFile.write('printf("\\n");')
 
 def addVar(var, data):
@@ -75,8 +73,9 @@ def let(cFile, line, type):
    size = len(type)
    list = line[size:].split()
    cFile.write(type+' '+(','.join(list))+';')
-   if size == 3: return False, list #inteiro
-   return True, list #float
+
+   n = {'int':0, 'float':1, 'char':2}
+   return n[type], list
 
 def op(cFile, line, op):
    #line = 'OP 5 2 5 > x'
@@ -132,7 +131,7 @@ def main(args):
    program = program.split('\n')
 
    #tabelas de simbolos
-   var = {} #False = inteiro, True = float
+   var = {} #0 = inteiro, 1 = float, 2 = char
 
    #tab
    tabBalance = 0
@@ -178,6 +177,7 @@ def main(args):
 
       #declarações
       elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
+      elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'char'))
       elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'int'))
       elif '>>' in line: assign(cFile, line)
 
