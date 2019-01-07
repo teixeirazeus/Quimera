@@ -69,12 +69,12 @@ def addVar(var, data):
    for x in data[1]:
       var[x] = tp[data[0]]
 
-def let(cFile, line, type):
+def let(cFile, line, varibleType):
    #declaraçao de variaveis
-   size = len(type)
-   list = line[size:].split()
-   cFile.write(type+' '+(','.join(list))+';')
-   return type, list
+   size = len(varibleType)
+   variblesList = line[size:].split()
+   cFile.write(varibleType + ' ' + (','.join(variblesList)) + ';')
+   return varibleType, variblesList
 
 def op(cFile, line, op):
    #line = 'OP 5 2 5 > x'
@@ -83,6 +83,8 @@ def op(cFile, line, op):
    tmp[0] = op.join(tmp[0].split())
    cFile.write(tmp[1]+'='+tmp[0]+';')
 
+
+# noinspection PyUnboundLocalVariable
 def loopFor(cFile, line, var):
     line = line.split()
     var[line[1]] = 'i'
@@ -116,20 +118,22 @@ def loopFor(cFile, line, var):
     return 1
 
 def smartSplit(string):
+    #corta pedaço de um codigo fora das aspas
+    #ignorando ',' dentro de string
     #fast
     if ',' not in string: return [string]
 
     block = ""
     aspas = False
-    list = []
+    blockList = []
     for c in string:
         if c == '"': aspas = not aspas
         block += c
         if not aspas and c == ',':
-            list.append(block.replace(',',''))
+            blockList.append(block.replace(',',''))
             block = ''
-    list.append(block)
-    return list
+    blockList.append(block)
+    return blockList
 
 def holyPrint(cFile, line, var):
     dataList = smartSplit(line)
@@ -148,7 +152,7 @@ def holyPrint(cFile, line, var):
     cFile.write(' '.join(tmp))
     cFile.write('",'+(','.join(dataList))+');\n')
 
-def defineF(cFile, line, var):
+def defineF(cFile, line):
     #def somador int x, int y >> int:
     split = line.split(">>")
     ret = split[1].replace(":","")
@@ -157,9 +161,8 @@ def defineF(cFile, line, var):
     cFile.write(ret+' '+name+'('+args+')'+'{')
     return 1
 
-def returnF(cFile, line, var):
+def returnF(cFile, line):
     cFile.write(line.replace('>>','return')+';'+'}')
-    var = {}
     return 1
 
 def splitMain(code):
@@ -223,8 +226,8 @@ def parse(code, cFile):
 
       #funções
       elif line[:5] == 'print': printf(cFile, line, var)
-      elif line[:3] == 'def': tabBalance += defineF(cFile, line, var)
-      elif line[:2] == '>>': tabBalance -= returnF(cFile, line, var)
+      elif line[:3] == 'def': tabBalance += defineF(cFile, line)
+      elif line[:2] == '>>': tabBalance -= returnF(cFile, line)
 
       #declarações
       elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
