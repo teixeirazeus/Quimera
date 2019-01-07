@@ -1,3 +1,11 @@
+
+def somador int x, int y >> int:
+    int resultado
+    + x y >> resultado
+    >> resultado
+
+
+
 int x y
 float z w
 int r[5]
@@ -40,3 +48,10 @@ for tmp 10 to 1 1.2:
 {printf("Teste de codigo em c \n");}
 
 "print like holyc",10,2.2
+
+
+
+def subtrator int x, int y >> int:
+    int resultado
+    - x y >> resultado
+    >> resultado

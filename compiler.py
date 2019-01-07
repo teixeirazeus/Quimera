@@ -148,45 +148,49 @@ def holyPrint(cFile, line, var):
     cFile.write(' '.join(tmp))
     cFile.write('",'+(','.join(dataList))+');\n')
 
+def defineF(cFile, line, var):
+    #def somador int x, int y >> int:
+    split = line.split(">>")
+    ret = split[1].replace(":","")
+    name = split[0].split()[1]
+    args = split[0][split[0].index(name)+len(name):]
+    cFile.write(ret+' '+name+'('+args+')'+'{')
+    return 1
 
-def main(args):
-   if len(args) == 1:
-       print("Quimera compiler version 1.0.1")
-       print("Use:")
-       print("./compiler <QUIMERA_CODE.qui> <OPTIONS>")
-       print("Options:")
-       print("-c: compile with gcc")
-       print("-r: run after compile")
-       return 0
+def returnF(cFile, line, var):
+    cFile.write(line.replace('>>','return')+';'+'}')
+    var = {}
+    return 1
 
-   name = args[1].split('.')[0]
+def splitMain(code):
+    functions = []
+    mainF = []
+    define = False
+    for line in code:
+        if tabCounter(line) == 0: define = False
+        if define:
+            functions.append(line)
+            continue
+        if line[:3] == 'def':
+            define = True
+            functions.append(line)
+            continue
+        mainF.append(line)
+    return functions, mainF
 
-   #Leitura
-   file = open(args[1], 'r')
-   program = file.read()
-   file.close()
-   #print(program)
+def parse(code, cFile):
+    #tabelas de simbolos
+    var = {} #variaveis
+    #old <> 0 = inteiro, 1 = float, 2 = char
+    #i = inteiro, f = float, c = char
 
-   program = program.split('\n')
+    #tab
+    tabBalance = 0
 
-   #tabelas de simbolos
-   var = {}
-   #old <> 0 = inteiro, 1 = float, 2 = char
-   #i = inteiro, f = float, c = char
-
-
-   #tab
-   tabBalance = 0
-
-   #gravação
-   cFile = open(name+'.c', 'w')
-   cFile.write("#include <stdio.h> \n int main(int argc, char **argv){")
-   ###
-
-   for line in program:
+    for line in code:
       if line in ['', ' ']: continue
 
-      print('>',line)
+      #print('>',line)
       if line[0] == "#": continue
 
       if tabCounter(line) < tabBalance:
@@ -200,6 +204,8 @@ def main(args):
       line = cleanS(line)
 
       #operações
+      #otimizar com dicionario e "ponteiro" as funções
+      #argumentos como uma lista apos funcao
       if line[0] ==  '+':  op(cFile, line, '+')
       elif line[0] ==  '-':  op(cFile, line, '-')
       elif line[0] ==  '/':  op(cFile, line, '/')
@@ -217,27 +223,66 @@ def main(args):
 
       #funções
       elif line[:5] == 'print': printf(cFile, line, var)
+      elif line[:3] == 'def': tabBalance += defineF(cFile, line, var)
+      elif line[:2] == '>>': tabBalance -= returnF(cFile, line, var)
 
       #declarações
       elif line[:5] ==  'float':  addVar(var, let(cFile, line, 'float'))
       elif line[:4] ==  'char':  addVar(var, let(cFile, line, 'char'))
       elif line[:3] ==  'int':  addVar(var, let(cFile, line, 'int'))
       elif '>>' in line: assign(cFile, line)
-      else:
-          print("<>",line)
-          holyPrint(cFile, line, var)
+      else: holyPrint(cFile, line, var)
 
-   ##
-   #final do programa
-   for x in range(tabBalance): cFile.write('}')
+    ##
+    #final do programa
+    for x in range(tabBalance): cFile.write('}')
 
-   cFile.write('return 0;}')
-   cFile.close()
 
-   if "-c" in args: os.system("gcc "+name+".c -O3 -o "+name)
-   if "-r" in args: os.system('./'+name)
+def main(args):
+    if len(args) == 1:
+        print("Quimera compiler version 1.0.1")
+        print("Use:")
+        print("./compiler <QUIMERA_CODE.qui> <OPTIONS>")
+        print("Options:")
+        print("-c: compile with gcc")
+        print("-r: run after compile")
+        return 0
 
-   return 0
+    name = args[1].split('.')[0]
+
+    #Leitura
+    #with open("configs/" + file, 'r') as filename:
+        #filename = filename.readlines()
+
+    file = open(args[1], 'r')
+    program = file.read()
+    file.close()
+    #print(program)
+
+    program = program.split('\n')
+    codeSplit = splitMain(program)
+
+    #gravação
+    cFile = open(name+'.c', 'w')
+
+    #header
+    cFile.write("#include <stdio.h> \n")
+
+    #funçoes
+    parse(codeSplit[0], cFile)
+
+    #__main__
+    cFile.write("int main(int argc, char **argv){")
+    parse(codeSplit[1], cFile)
+    cFile.write('return 0;}')
+
+
+    cFile.close()
+
+    if "-c" in args: os.system("gcc "+name+".c -O3 -o "+name)
+    if "-r" in args: os.system('./'+name)
+
+    return 0
 
 if __name__ == '__main__':
    import sys
